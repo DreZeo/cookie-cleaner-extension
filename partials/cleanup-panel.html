@@ -1,0 +1,72 @@
+<section class="tab-panel active" id="cleanupTab" role="tabpanel">
+  <div class="cache-grid">
+    <div class="cache-card" data-type="cookies">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-cookie-bite"></i></div>
+        <div class="card-title" id="cardTitleCookies">Cookie 缓存</div>
+      </div>
+      <div class="card-value" id="cookieCount">-</div>
+      <div class="card-meta" id="cookieSize"></div>
+    </div>
+
+    <div class="cache-card" data-type="localStorage">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-hard-drive"></i></div>
+        <div class="card-title" id="cardTitleLocalStorage">本地存储</div>
+      </div>
+      <div class="card-value" id="localStorageCount">-</div>
+      <div class="card-meta" id="localStorageSize"></div>
+    </div>
+
+    <div class="cache-card" data-type="sessionStorage">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-box-archive"></i></div>
+        <div class="card-title" id="cardTitleSessionStorage">会话存储</div>
+      </div>
+      <div class="card-value" id="sessionStorageCount">-</div>
+      <div class="card-meta" id="sessionStorageSize"></div>
+    </div>
+
+    <div class="cache-card" data-type="indexedDB">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-database"></i></div>
+        <div class="card-title" id="cardTitleIndexedDB">IndexedDB</div>
+      </div>
+      <div class="card-value" id="indexedDBCount">-</div>
+      <div class="card-meta" id="indexedDBSize"></div>
+    </div>
+
+    <div class="cache-card" data-type="cacheStorage">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="card-title" id="cardTitleCacheStorage">缓存存储</div>
+      </div>
+      <div class="card-value" id="cacheStorageCount">-</div>
+      <div class="card-meta" id="cacheStorageSize"></div>
+    </div>
+
+    <div class="cache-card" data-type="serviceWorker">
+      <div class="clear-btn clear-icon" title="清除此项"><i class="fa-solid fa-trash-can"></i></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-gears"></i></div>
+        <div class="card-title" id="cardTitleServiceWorker">SW 服务</div>
+      </div>
+      <div class="card-value" id="serviceWorkerCount">-</div>
+      <div class="card-meta" id="serviceWorkerMetaText">Worker 线程</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-refresh" id="refreshBtn">
+      <i class="fa-solid fa-rotate-right"></i> <span id="refreshBtnText">重新扫描</span>
+    </button>
+    <button class="btn btn-clean" id="clearAllBtn">
+      <i class="fa-solid fa-rocket"></i> <span id="clearAllBtnText">一键清理</span>
+    </button>
+  </div>
+</section>

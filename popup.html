@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/cleanup.css">
+  <link rel="stylesheet" href="styles/history.css">
+  <link rel="stylesheet" href="styles/permission.css">
+  <link rel="stylesheet" href="styles/privacy.css">
+</head>
+
+<body>
+  <div data-partial="header.html"></div>
+  <div class="tabs" role="tablist" aria-label="功能导航" id="tabsRoot">
+    <button class="tab-btn active" type="button" data-tab="cleanupTab" role="tab" aria-controls="cleanupTab" aria-selected="true">
+      <i class="fa-solid fa-broom"></i> <span id="tabCleanupText">清理</span>
+    </button>
+    <button class="tab-btn" type="button" data-tab="historyTab" role="tab" aria-controls="historyTab" aria-selected="false">
+      <i class="fa-solid fa-clock-rotate-left"></i> <span id="tabHistoryText">记录</span>
+    </button>
+    <button class="tab-btn" type="button" data-tab="permissionTab" role="tab" aria-controls="permissionTab" aria-selected="false">
+      <i class="fa-solid fa-key"></i> <span id="tabPermissionText">权限</span>
+    </button>
+    <button class="tab-btn" type="button" data-tab="privacyTab" role="tab" aria-controls="privacyTab" aria-selected="false">
+      <i class="fa-solid fa-user-shield"></i> <span id="tabPrivacyText">隐私</span>
+    </button>
+  </div>
+
+  <div class="tab-panels">
+    <div data-partial="cleanup-panel.html"></div>
+    <div data-partial="history-panel.html"></div>
+    <div data-partial="permission-panel.html"></div>
+    <div data-partial="privacy-panel.html"></div>
+  </div>
+
+  <div class="toast" id="message">
+    <i class="fa-solid "></i> <span></span>
+  </div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+header {
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.theme-toggle,
+.lang-toggle {
+  min-width: 78px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.theme-toggle:hover,
+.lang-toggle:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-strong);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:active,
+.lang-toggle:active {
+  transform: translateY(0);
+}
+
+.domain-badge {
+  width: 100%;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.domain-badge i {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tab-btn i {
+  font-size: 12px;
+}
+
+.tab-btn:hover {
+  background: var(--surface-strong);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 1px var(--accent-ring);
+  transform: none;
+}
+
+.tab-panels {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 8px;
+}
+
+.tab-panels::after {
+  content: '';
+  display: block;
+  height: 10px;
+}
+
+.tab-panel {
+  display: none;
+  animation: panelFadeIn 0.18s ease;
+  padding-bottom: 8px;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.tab-panel > :last-child {
+  margin-bottom: 0;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resources-panel,
+.history-panel,
+.permission-panel {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

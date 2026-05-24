@@ -1,0 +1,95 @@
+<section class="tab-panel" id="privacyTab" role="tabpanel">
+  <div class="privacy-panel privacy-danger privacy-guest" id="guestModePanel">
+    <div class="privacy-panel-header">
+      <div class="privacy-icon danger"><i class="fa-solid fa-user-ninja"></i></div>
+      <div class="privacy-panel-title">
+        <span class="privacy-title-text" id="guestModeTitleText">访客模式</span>
+        <span class="privacy-sub-text" id="guestModeDescText">一键清除当前站点所有本地数据、浏览记录与授权</span>
+      </div>
+    </div>
+    <div class="privacy-guest-target" id="guestModeTarget">-</div>
+    <div class="privacy-guest-options">
+      <select class="time-select" id="guestModeTimeRange">
+        <option value="0" id="guestModeRangeAll" selected>所有时间</option>
+        <option value="3600000" id="guestModeRange1h">过去一小时</option>
+        <option value="86400000" id="guestModeRange24h">过去 24 小时</option>
+        <option value="604800000" id="guestModeRange7d">过去 7 天</option>
+        <option value="2419200000" id="guestModeRange4w">过去 4 周</option>
+      </select>
+      <label class="control-item privacy-guest-override">
+        <input type="checkbox" id="guestModeOverrideWhitelist">
+        <span id="guestModeOverrideText">忽略白名单强制清理</span>
+      </label>
+    </div>
+    <button class="btn btn-perm revoke privacy-clear-btn privacy-guest-btn"
+            id="runGuestModeBtn" type="button"
+            data-action="guestMode" data-base-text-id="runGuestModeBtnText">
+      <i class="fa-solid fa-user-ninja"></i>
+      <span id="runGuestModeBtnText">启动访客模式</span>
+    </button>
+  </div>
+
+  <div class="privacy-notice" id="privacyScopeNotice">
+    <i class="fa-solid fa-circle-info"></i>
+    <span id="privacyScopeNoticeText">以下操作作用于整个浏览器，不受当前站点限制</span>
+  </div>
+
+  <div class="privacy-panel">
+    <div class="privacy-panel-header">
+      <div class="privacy-icon"><i class="fa-solid fa-keyboard"></i></div>
+      <div class="privacy-panel-title">
+        <span class="privacy-title-text" id="privacyFormDataTitleText">自动填充数据</span>
+        <span class="privacy-sub-text" id="privacyFormDataDescText">地址、支付、姓名等浏览器自动填充内容</span>
+      </div>
+    </div>
+    <div class="privacy-actions">
+      <button class="btn btn-perm" id="viewFormDataBtn" type="button">
+        <i class="fa-solid fa-up-right-from-square"></i>
+        <span id="viewFormDataBtnText">在浏览器中查看</span>
+      </button>
+      <button class="btn btn-perm revoke privacy-clear-btn" id="clearFormDataBtn" type="button"
+              data-action="formData" data-base-text-id="clearFormDataBtnText">
+        <i class="fa-solid fa-trash-can"></i>
+        <span id="clearFormDataBtnText">清除</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="privacy-panel privacy-danger">
+    <div class="privacy-panel-header">
+      <div class="privacy-icon danger"><i class="fa-solid fa-key"></i></div>
+      <div class="privacy-panel-title">
+        <span class="privacy-title-text" id="privacyPasswordsTitleText">保存的密码</span>
+        <span class="privacy-sub-text" id="privacyPasswordsDescText">浏览器存储的登录凭据，清除后需重新登录所有站点</span>
+      </div>
+    </div>
+    <div class="privacy-actions">
+      <button class="btn btn-perm" id="viewPasswordsBtn" type="button">
+        <i class="fa-solid fa-up-right-from-square"></i>
+        <span id="viewPasswordsBtnText">在浏览器中查看</span>
+      </button>
+      <button class="btn btn-perm revoke privacy-clear-btn" id="clearPasswordsBtn" type="button"
+              data-action="passwords" data-base-text-id="clearPasswordsBtnText">
+        <i class="fa-solid fa-trash-can"></i>
+        <span id="clearPasswordsBtnText">清除</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="privacy-panel">
+    <div class="privacy-panel-header">
+      <div class="privacy-icon"><i class="fa-solid fa-clock"></i></div>
+      <div class="privacy-panel-title">
+        <span class="privacy-title-text" id="privacyTimeRangeTitleText">清理时间范围</span>
+        <span class="privacy-sub-text" id="privacyTimeRangeDescText">应用于以上两项清理操作</span>
+      </div>
+    </div>
+    <select class="time-select" id="privacyTimeRange">
+      <option value="3600000" id="privacyRange1h">过去一小时</option>
+      <option value="86400000" id="privacyRange24h">过去 24 小时</option>
+      <option value="604800000" id="privacyRange7d">过去 7 天</option>
+      <option value="2419200000" id="privacyRange4w">过去 4 周</option>
+      <option value="0" id="privacyRangeAll" selected>所有时间</option>
+    </select>
+  </div>
+</section>

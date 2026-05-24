@@ -1,0 +1,68 @@
+<section class="tab-panel" id="historyTab" role="tabpanel">
+  <div class="history-panel">
+    <div class="history-header">
+      <div class="history-info">
+        <div class="history-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div>
+          <div class="history-title" id="historyTitleText">浏览记录</div>
+          <div class="history-count" id="historyCount">-</div>
+        </div>
+      </div>
+      <div class="history-controls">
+        <select class="time-select" id="historyTimeRange">
+          <option value="3600000" id="historyRange1h">过去一小时</option>
+          <option value="86400000" id="historyRange24h">过去 24 小时</option>
+          <option value="604800000" id="historyRange7d">过去 7 天</option>
+          <option value="2419200000" id="historyRange4w">过去 4 周</option>
+          <option value="0" id="historyRangeAll">所有时间</option>
+        </select>
+        <button class="btn btn-history" id="clearHistoryBtn">
+          <i class="fa-solid fa-trash-can"></i> <span id="clearHistoryBtnText">清除</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="resources-panel">
+    <div class="panel-title"><i class="fa-solid fa-clipboard-list"></i> <span id="cleanupLogTitleText">清理历史日志</span></div>
+    <div class="cleanup-log-toolbar">
+      <div class="cleanup-log-filters" id="cleanupLogFilterGroup">
+        <button class="cleanup-log-filter-btn active" type="button" data-filter="all"><span id="cleanupLogFilterAllText">全部</span></button>
+        <button class="cleanup-log-filter-btn" type="button" data-filter="success"><span id="cleanupLogFilterSuccessText">成功</span></button>
+        <button class="cleanup-log-filter-btn" type="button" data-filter="failed"><span id="cleanupLogFilterFailedText">失败</span></button>
+        <button class="cleanup-log-filter-btn" type="button" data-filter="blocked"><span id="cleanupLogFilterBlockedText">拦截</span></button>
+      </div>
+      <button class="cleanup-log-clear-btn" id="clearCleanupLogBtn" type="button">
+        <i class="fa-solid fa-trash-can"></i> <span id="clearCleanupLogBtnText">清空</span>
+      </button>
+    </div>
+    <div class="cleanup-log-summary" id="cleanupLogSummaryText">最近 0 条</div>
+    <div class="cleanup-log-list" id="cleanupLogList"></div>
+  </div>
+
+  <div class="resources-panel">
+    <div class="panel-title"><i class="fa-solid fa-chart-pie"></i> <span id="resourcesTitleText">页面资源占用</span></div>
+    <div class="resources-list">
+      <div class="resource-item">
+        <div class="res-icon"><i class="fa-solid fa-image"></i></div>
+        <div class="res-count" id="imageCount">0</div>
+        <div class="res-name" id="resourceImageText">图片</div>
+      </div>
+      <div class="resource-item">
+        <div class="res-icon"><i class="fa-brands fa-js"></i></div>
+        <div class="res-count" id="scriptCount">0</div>
+        <div class="res-name" id="resourceScriptText">脚本</div>
+      </div>
+      <div class="resource-item">
+        <div class="res-icon"><i class="fa-brands fa-css3-alt"></i></div>
+        <div class="res-count" id="styleCount">0</div>
+        <div class="res-name" id="resourceStyleText">样式</div>
+      </div>
+      <div class="resource-item">
+        <div class="res-icon"><i class="fa-solid fa-file"></i></div>
+        <div class="res-count" id="otherCount">0</div>
+        <div class="res-name" id="resourceOtherText">其他</div>
+      </div>
+    </div>
+  </div>
+</section>

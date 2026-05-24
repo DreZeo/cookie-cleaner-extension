@@ -1,0 +1,54 @@
+<section class="tab-panel" id="permissionTab" role="tabpanel">
+  <div class="permission-panel">
+    <div class="panel-title"><i class="fa-solid fa-key"></i> <span id="permissionTitleText">当前站点访问（Cookie）</span></div>
+    <div class="permission-row">
+      <div class="permission-site" id="permissionSite">-</div>
+      <span class="permission-badge unknown" id="sitePermissionStatus">检测中</span>
+    </div>
+    <div class="permission-detail" id="sitePermissionDetail">正在读取当前站点访问授权状态...</div>
+    <div class="permission-actions">
+      <button class="btn btn-perm" id="grantSitePermissionBtn" type="button">
+        <i class="fa-solid fa-unlock-keyhole"></i> <span id="grantSitePermissionBtnText">授权访问</span>
+      </button>
+      <button class="btn btn-perm revoke" id="revokeSitePermissionBtn" type="button">
+        <i class="fa-solid fa-user-slash"></i> <span id="revokeSitePermissionBtnText">撤销访问</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="permission-panel">
+    <div class="panel-title"><i class="fa-solid fa-shield-halved"></i> <span id="whitelistTitleText">当前站点清理保护</span></div>
+    <div class="permission-row">
+      <div class="permission-site" id="whitelistCurrentSite">-</div>
+      <span class="permission-badge unknown" id="whitelistStatus">检测中</span>
+    </div>
+    <div class="permission-detail" id="whitelistDetail">正在读取站点保护状态...</div>
+    <div class="permission-actions">
+      <button class="btn btn-perm" id="addWhitelistBtn" type="button">
+        <i class="fa-solid fa-plus"></i> <span id="addWhitelistBtnText">加入保护</span>
+      </button>
+      <button class="btn btn-perm revoke" id="removeWhitelistBtn" type="button">
+        <i class="fa-solid fa-minus"></i> <span id="removeWhitelistBtnText">取消保护</span>
+      </button>
+    </div>
+    <div class="permission-detail whitelist-summary" id="whitelistListSummary">已保护 0 个站点</div>
+    <div class="whitelist-list" id="whitelistList"></div>
+  </div>
+
+  <div class="permission-panel" id="contentSettingsPanel">
+    <div class="panel-title"><i class="fa-solid fa-sliders"></i> <span id="contentSettingsTitleText">浏览器内容设置（当前站点）</span></div>
+    <div class="permission-detail" id="contentSettingsDetail">正在读取内容设置...</div>
+    <div class="content-settings-list" id="contentSettingsList"></div>
+  </div>
+
+  <div class="controls">
+    <label class="control-item">
+      <input type="checkbox" id="includeSubdomains" checked>
+      <span id="includeSubdomainsText">包含所有子域名数据</span>
+    </label>
+    <label class="control-item">
+      <input type="checkbox" id="autoRefresh" checked>
+      <span id="autoRefreshText">清理后自动刷新页面</span>
+    </label>
+  </div>
+</section>

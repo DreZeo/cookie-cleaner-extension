@@ -1,0 +1,167 @@
+.privacy-notice {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 11px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.privacy-notice i {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.privacy-panel {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.privacy-panel.privacy-danger {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: linear-gradient(180deg, rgba(255, 107, 107, 0.06), var(--surface));
+}
+
+.privacy-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.privacy-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.privacy-icon.danger {
+  background: rgba(255, 107, 107, 0.16);
+  color: var(--danger);
+}
+
+.privacy-panel-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.privacy-title-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.privacy-sub-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.privacy-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.privacy-clear-btn.confirming {
+  background: rgba(255, 107, 107, 0.22);
+  border-color: rgba(255, 107, 107, 0.6);
+  color: var(--danger);
+  font-weight: 800;
+  animation: privacyPulse 0.6s ease infinite alternate;
+}
+
+@keyframes privacyPulse {
+  from { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.35); }
+  to   { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
+}
+
+#privacyTab .time-select {
+  margin-top: 2px;
+}
+
+.privacy-guest {
+  background: linear-gradient(160deg, rgba(255, 107, 107, 0.14), rgba(255, 107, 107, 0.04) 70%, var(--surface));
+  border-color: rgba(255, 107, 107, 0.45);
+}
+
+.privacy-guest-target {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px dashed rgba(255, 107, 107, 0.35);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.privacy-guest-options {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.privacy-guest-override {
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--surface-subtle);
+  border-color: var(--border);
+}
+
+.privacy-guest-override input:checked {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.privacy-guest-btn {
+  width: 100%;
+  height: 42px;
+  font-size: 13px;
+  font-weight: 800;
+  border-color: rgba(255, 107, 107, 0.5);
+  background: linear-gradient(120deg, rgba(255, 107, 107, 0.18), rgba(255, 107, 107, 0.08));
+  color: var(--danger);
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.18);
+}
+
+.privacy-guest-btn:hover {
+  border-color: rgba(255, 107, 107, 0.7);
+  background: linear-gradient(120deg, rgba(255, 107, 107, 0.28), rgba(255, 107, 107, 0.14));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.28);
+}
+
+.privacy-guest-btn.confirming {
+  background: linear-gradient(120deg, #ff8989, #ff5959);
+  color: #ffffff;
+}

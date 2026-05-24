@@ -1,0 +1,305 @@
+.permission-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.permission-site {
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.permission-badge {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.permission-badge.granted {
+  color: var(--success);
+  background: rgba(42, 216, 139, 0.14);
+  border-color: rgba(42, 216, 139, 0.3);
+}
+
+.permission-badge.denied {
+  color: var(--danger);
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.28);
+}
+
+.permission-badge.unknown {
+  color: var(--warning);
+  background: rgba(255, 179, 71, 0.14);
+  border-color: rgba(255, 179, 71, 0.28);
+}
+
+.permission-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+  min-height: 16px;
+  margin-bottom: 10px;
+  word-break: break-all;
+  line-height: 1.35;
+}
+
+.permission-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.whitelist-summary {
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+.whitelist-list {
+  display: grid;
+  gap: 8px;
+  max-height: 128px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.whitelist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  padding: 8px 10px;
+}
+
+.whitelist-item-main {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.whitelist-domain {
+  font-size: 12px;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whitelist-scope {
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.whitelist-remove {
+  min-width: 56px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 107, 107, 0.32);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.whitelist-remove:hover {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.14);
+}
+
+.whitelist-empty {
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  padding: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.btn.btn-perm {
+  height: 36px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
+  color: var(--text-main);
+}
+
+.btn.btn-perm:hover {
+  background: var(--surface-strong);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.btn.btn-perm.revoke {
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.32);
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.btn.btn-perm.revoke:hover {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.14);
+}
+
+.btn.btn-perm:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--surface-subtle);
+}
+
+.btn.btn-perm.revoke:disabled {
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--surface-subtle);
+}
+
+.content-settings-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.content-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  padding: 8px 10px;
+}
+
+.content-setting-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.content-setting-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.content-setting-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.content-setting-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.content-setting-status {
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.content-setting-status.allow {
+  color: var(--success);
+  background: rgba(42, 216, 139, 0.14);
+  border-color: rgba(42, 216, 139, 0.3);
+}
+
+.content-setting-status.block {
+  color: var(--danger);
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.28);
+}
+
+.content-setting-status.ask,
+.content-setting-status.session_only {
+  color: var(--warning);
+  background: rgba(255, 179, 71, 0.14);
+  border-color: rgba(255, 179, 71, 0.28);
+}
+
+.content-setting-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.content-setting-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.content-setting-btn:hover {
+  background: var(--surface-strong);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.content-setting-btn.allow.active {
+  color: var(--success);
+  background: rgba(42, 216, 139, 0.18);
+  border-color: rgba(42, 216, 139, 0.4);
+}
+
+.content-setting-btn.block.active {
+  color: var(--danger);
+  background: rgba(255, 107, 107, 0.18);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+
+.content-setting-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.content-settings-empty {
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  padding: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}

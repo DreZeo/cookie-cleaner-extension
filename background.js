@@ -7,9 +7,12 @@ import {
   matchesCandidates,
   escapeRegExp,
   urlMatchesCandidates,
-  toSafeTimeRangeMs,
-  filterHistoryItems
+  toSafeTimeRangeMs
 } from './scripts/domain-utils.js';
+import {
+  mergeHistorySearchResults,
+  summarizeHistoryClear
+} from './scripts/history-model.js';
 
 const HISTORY_MAX_RESULTS = 5000;
 const WHITELIST_STORAGE_KEY = 'whitelistRules';
@@ -243,7 +246,14 @@ function historySearch(query) {
 
 async function getHistoryItems(domain, timeRangeMs, includeSubdomains) {
   const candidates = getDomainCandidates(domain);
-  if (candidates.length === 0) return [];
+  if (candidates.length === 0) {
+    return {
+      status: 'ok',
+      count: 0,
+      truncated: false,
+      items: []
+    };
+  }
 
   const safeTimeRangeMs = toSafeTimeRangeMs(timeRangeMs);
   const startTime = safeTimeRangeMs > 0 ? Date.now() - safeTimeRangeMs : 0;
@@ -264,24 +274,42 @@ async function getHistoryItems(domain, timeRangeMs, includeSubdomains) {
     })
   );
 
-  const mergedByUrl = new Map();
-  for (const results of queryResults) {
-    const filtered = filterHistoryItems(results, candidates, includeSubdomains);
-    for (const item of filtered) {
-      if (!item?.url || mergedByUrl.has(item.url)) continue;
-      mergedByUrl.set(item.url, item);
-    }
-  }
+  return mergeHistorySearchResults(queryResults, candidates, includeSubdomains, HISTORY_MAX_RESULTS);
+}
 
-  return Array.from(mergedByUrl.values());
+function historyDeleteUrl(url) {
+  return new Promise(resolve => {
+    try {
+      chrome.history.deleteUrl({ url }, () => {
+        const err = chrome.runtime?.lastError;
+        resolve(!err);
+      });
+    } catch {
+      resolve(false);
+    }
+  });
 }
 
 async function clearHistory(domain, timeRangeMs, includeSubdomains) {
-  const items = await getHistoryItems(domain, timeRangeMs, includeSubdomains);
-  for (const item of items) {
-    await chrome.history.deleteUrl({ url: item.url });
+  const beforeScan = await getHistoryItems(domain, timeRangeMs, includeSubdomains);
+  let deletedCount = 0;
+  let failedCount = 0;
+
+  for (const item of beforeScan.items) {
+    const deleted = await historyDeleteUrl(item.url);
+    if (deleted) {
+      deletedCount += 1;
+    } else {
+      failedCount += 1;
+    }
   }
-  return items.length;
+
+  const afterScan = await getHistoryItems(domain, timeRangeMs, includeSubdomains);
+  return summarizeHistoryClear(beforeScan, afterScan, {
+    attemptedCount: beforeScan.items.length,
+    deletedCount,
+    failedCount
+  });
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -294,14 +322,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'history_get') {
     getHistoryItems(message.domain, message.timeRangeMs, message.includeSubdomains)
-      .then(items => sendResponse({ ok: true, count: items.length }))
+      .then(scan => sendResponse({
+        ok: true,
+        status: scan.status,
+        count: scan.count,
+        truncated: scan.truncated
+      }))
       .catch(err => sendResponse({ ok: false, error: String(err?.message || err) }));
     return true;
   }
 
   if (message.type === 'history_clear') {
     clearHistory(message.domain, message.timeRangeMs, message.includeSubdomains)
-      .then(count => sendResponse({ ok: true, count }))
+      .then(summary => sendResponse({ ok: true, ...summary }))
       .catch(err => sendResponse({ ok: false, error: String(err?.message || err) }));
     return true;
   }

@@ -160,7 +160,14 @@ export async function runGuestMode(tab, options = {}) {
         tryStep('serviceWorker', failures, () => clearServiceWorkers(tabId)),
         tryStep('browsingCache', failures, () => origin ? clearBrowsingCache(origin) : Promise.resolve()),
         tryStep('history', failures, async () => {
-            historyCount = await clearHistory(domain, timeRangeMs, includeSubdomains);
+            const summary = await clearHistory(domain, timeRangeMs, includeSubdomains);
+            historyCount = Number.isFinite(Number(summary?.deletedCount)) ? Number(summary.deletedCount) : 0;
+            if (!summary || summary.result === 'failed') {
+                throw new Error('historyClearFailed');
+            }
+            if (summary.result === 'partial') {
+                failures.push('historyPartial');
+            }
         }),
         tryStep('contentSettings', failures, async () => {
             contentSettingsReset = await resetContentSettingsForSite(url);

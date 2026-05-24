@@ -34,7 +34,7 @@ import {
 } from './cleanup-log.js';
 import { updateAllStats } from './cleanup.js';
 import { clearAll, clearByType } from './cleanup-actions.js';
-import { clearHistory, updateHistoryStats } from './history.js';
+import { clearHistory, getHistoryClearMessageKey, getHistoryLogDetail, updateHistoryStats } from './history.js';
 import {
     getContentSettings,
     isAskSupported,
@@ -421,14 +421,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const timeRangeMs = toSafeTimeRangeMs(document.getElementById('historyTimeRange').value);
             const includeSubdomains = document.getElementById('includeSubdomains').checked;
 
-            const count = await clearHistory(domain, timeRangeMs, includeSubdomains);
-            showMessage(t('message.historyCleared', { count }), 'success');
+            const summary = await clearHistory(domain, timeRangeMs, includeSubdomains);
+            showMessage(
+                t(getHistoryClearMessageKey(summary), { count: summary.deletedCount ?? 0 }),
+                summary.result === 'success' ? 'success' : 'error'
+            );
             await recordCleanupLog({
                 domain,
                 action: 'history',
-                result: 'success',
-                count,
-                detail: ''
+                result: summary.result,
+                count: summary.deletedCount,
+                detail: getHistoryLogDetail(summary)
             });
             await updateHistoryStats();
         } catch (e) {

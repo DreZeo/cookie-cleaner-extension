@@ -44,9 +44,16 @@ import {
 import {
     clearFormData,
     clearPasswords,
+    getPrivacyCapability,
     isBrowsingDataAvailable,
     openBrowserSettings
 } from './privacy-data.js';
+import {
+    getPrivacyClearMessageKey,
+    getPrivacyConfirmMessageKey,
+    getPrivacyLogDetail,
+    getPrivacyTimeRangeTextKey
+} from './privacy-model.js';
 import { runGuestMode } from './guest-mode.js';
 
 const CLEAN_ACTION_CONFIRMATION = new Set(['clearAll', 'clearHistory', 'formData', 'passwords', 'guestMode']);
@@ -484,10 +491,18 @@ function bindPrivacyTab() {
         });
     }
 
-    setupPrivacyClearButton(clearFormDataBtn, 'formData', () =>
-        clearFormData(timeRangeSelect.value));
-    setupPrivacyClearButton(clearPasswordsBtn, 'passwords', () =>
-        clearPasswords(timeRangeSelect.value));
+    setupPrivacyClearButton(
+        clearFormDataBtn,
+        'formData',
+        timeRangeMs => clearFormData(timeRangeMs),
+        () => timeRangeSelect.value
+    );
+    setupPrivacyClearButton(
+        clearPasswordsBtn,
+        'passwords',
+        timeRangeMs => clearPasswords(timeRangeMs),
+        () => timeRangeSelect.value
+    );
 
     bindGuestMode();
 }
@@ -639,10 +654,10 @@ function bindGuestMode() {
         await updateHistoryStats();
         await updateCleanupLogList();
 
-        // 刷新页面并关闭 popup
+        // 无痕退出：清理完成后关闭被清理的网页标签页。
         if (tab?.id) {
             setTimeout(() => {
-                try { chrome.tabs.reload(tab.id); } catch { }
+                try { chrome.tabs.remove(tab.id); } catch { }
                 window.close();
             }, 600);
         }
@@ -657,7 +672,7 @@ function bindGuestMode() {
  * 为清除按钮设置 inline 二次确认：首次点击切换到 3s 倒计时文案，
  * 再次点击则真正执行；超时或失焦则自动回到初始态。
  */
-function setupPrivacyClearButton(button, action, runner) {
+function setupPrivacyClearButton(button, action, runner, getTimeRangeMs) {
     const baseTextId = button.dataset.baseTextId || '';
     const baseTextNode = baseTextId ? document.getElementById(baseTextId) : null;
     const iconNode = button.querySelector('i');
@@ -707,31 +722,39 @@ function setupPrivacyClearButton(button, action, runner) {
             showMessage(t('message.privacyClearFailed'), 'error');
             return;
         }
+        const timeRangeMs = toSafeTimeRangeMs(typeof getTimeRangeMs === 'function' ? getTimeRangeMs() : 0);
+        const timeRangeText = t(getPrivacyTimeRangeTextKey(timeRangeMs));
+        const capability = getPrivacyCapability(action, timeRangeMs);
+        if (!capability.available) {
+            showMessage(t('message.privacyUnavailable'), 'error');
+            return;
+        }
         if (!confirmHighRiskAction(
             t('message.highRiskConfirmTitle'),
-            action === 'guestMode'
-                ? t('message.highRiskConfirmGuestMode')
-                : action === 'formData'
-                    ? t('message.highRiskConfirmFormData')
-                    : t('message.highRiskConfirmPasswords')
+            t(getPrivacyConfirmMessageKey(action), { range: timeRangeText })
         )) {
             button.disabled = false;
             return;
         }
-        let success = true;
-        let errorMsg = '';
+        let result;
         try {
-            await runner();
+            result = await runner(timeRangeMs);
         } catch (e) {
-            success = false;
-            errorMsg = String(e?.message || e || '');
-            console.error(`${action} 清除失败:`, e);
+            result = {
+                action,
+                result: 'failed',
+                verified: false,
+                scope: 'browser',
+                timeRangeMs,
+                error: String(e?.message || e || '')
+            };
         }
+        const success = result?.result === 'success';
 
         if (success) {
-            const msgKey = action === 'formData' ? 'message.formDataCleared' : 'message.passwordsCleared';
-            showMessage(t(msgKey), 'success');
+            showMessage(t(getPrivacyClearMessageKey(result)), 'success');
         } else {
+            console.error(`${action} 清除失败:`, result?.error || 'unknown error');
             showMessage(t('message.privacyClearFailed'), 'error');
         }
 
@@ -739,7 +762,14 @@ function setupPrivacyClearButton(button, action, runner) {
             domain: 'browser',
             action,
             result: success ? 'success' : 'failed',
-            detail: success ? '' : errorMsg
+            detail: getPrivacyLogDetail(result || {
+                action,
+                result: 'failed',
+                verified: false,
+                scope: 'browser',
+                timeRangeMs,
+                error: 'missing result'
+            })
         });
     });
 

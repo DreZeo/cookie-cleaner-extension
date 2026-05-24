@@ -1,4 +1,4 @@
-// ========== 访客模式：当前站点六维深度清理 ==========
+// ========== 无痕退出：当前站点六维深度清理 ==========
 // 并行执行：Cookie + 所有本地存储 + 浏览记录 + 内容设置重置 + 撤销主机权限。
 // 失败项聚合为 failures 数组，不阻断其他步骤。
 
@@ -58,7 +58,7 @@ async function resetContentSettingsForSite(url) {
     return resetCount;
 }
 
-// 访客模式步骤列表（执行顺序无关，仅用于计数与状态判定）
+// 无痕退出步骤列表（执行顺序无关，仅用于计数与状态判定）
 const GUEST_MODE_STEPS = [
     'cookies',
     'localStorage',
@@ -87,7 +87,7 @@ function buildGuestModeResult(extra = {}) {
 }
 
 /**
- * 执行访客模式清理。
+ * 执行无痕退出清理。
  * @param {chrome.tabs.Tab} tab 当前活动标签页
  * @param {{ timeRangeMs?: number, overrideWhitelist?: boolean }} options
  * @returns {Promise<{ status: 'blocked'|'success'|'partial'|'failed', failures: string[],
@@ -106,7 +106,7 @@ export async function runGuestMode(tab, options = {}) {
     }
 
     if (!options.overrideWhitelist) {
-        // 访客模式是浏览器级深度清理，保留白名单默认保护。
+        // 无痕退出是浏览器级深度清理，保留白名单默认保护。
         // 只有用户主动勾选忽略白名单时才允许继续。
     }
 

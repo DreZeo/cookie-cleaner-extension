@@ -3,11 +3,20 @@
 // 只能按时间范围进行全浏览器范围清理。扩展 API 也无法预览密码或表单内容。
 
 import { toSafeTimeRangeMs } from './utils.js';
+import {
+    PRIVACY_ACTIONS,
+    createPrivacyCapability,
+    createPrivacyClearResult
+} from './privacy-model.js';
 
 export function isBrowsingDataAvailable() {
     return !!(chrome.browsingData
         && typeof chrome.browsingData.removeFormData === 'function'
         && typeof chrome.browsingData.removePasswords === 'function');
+}
+
+export function getPrivacyCapability(action, timeRangeMs) {
+    return createPrivacyCapability(action, timeRangeMs, isBrowsingDataAvailable());
 }
 
 function removalOptions(timeRangeMs) {
@@ -36,13 +45,29 @@ function runRemoval(method, options) {
 }
 
 export async function clearFormData(timeRangeMs) {
-    if (!isBrowsingDataAvailable()) throw new Error('browsingData API unavailable');
-    await runRemoval('removeFormData', removalOptions(timeRangeMs));
+    const safeTimeRangeMs = toSafeTimeRangeMs(timeRangeMs);
+    if (!isBrowsingDataAvailable()) {
+        return createPrivacyClearResult(PRIVACY_ACTIONS.FORM_DATA, safeTimeRangeMs, 'failed', 'browsingData API unavailable');
+    }
+    try {
+        await runRemoval('removeFormData', removalOptions(safeTimeRangeMs));
+        return createPrivacyClearResult(PRIVACY_ACTIONS.FORM_DATA, safeTimeRangeMs, 'success');
+    } catch (e) {
+        return createPrivacyClearResult(PRIVACY_ACTIONS.FORM_DATA, safeTimeRangeMs, 'failed', e?.message || e);
+    }
 }
 
 export async function clearPasswords(timeRangeMs) {
-    if (!isBrowsingDataAvailable()) throw new Error('browsingData API unavailable');
-    await runRemoval('removePasswords', removalOptions(timeRangeMs));
+    const safeTimeRangeMs = toSafeTimeRangeMs(timeRangeMs);
+    if (!isBrowsingDataAvailable()) {
+        return createPrivacyClearResult(PRIVACY_ACTIONS.PASSWORDS, safeTimeRangeMs, 'failed', 'browsingData API unavailable');
+    }
+    try {
+        await runRemoval('removePasswords', removalOptions(safeTimeRangeMs));
+        return createPrivacyClearResult(PRIVACY_ACTIONS.PASSWORDS, safeTimeRangeMs, 'success');
+    } catch (e) {
+        return createPrivacyClearResult(PRIVACY_ACTIONS.PASSWORDS, safeTimeRangeMs, 'failed', e?.message || e);
+    }
 }
 
 /**

@@ -7,6 +7,69 @@ import {
     getFirstPartyCookies
 } from './cookies.js';
 
+export const SCAN_STATUS = {
+    OK: 'ok',
+    NO_PERMISSION: 'no_permission',
+    UNSUPPORTED: 'unsupported',
+    FAILED: 'failed'
+};
+
+export const CLEANUP_SCAN_TYPES = [
+    'cookies',
+    'localStorage',
+    'sessionStorage',
+    'indexedDB',
+    'cacheStorage',
+    'serviceWorker'
+];
+
+export function createScanItem(status, data = {}) {
+    return {
+        status,
+        count: Number.isFinite(Number(data.count)) ? Number(data.count) : null,
+        size: Number.isFinite(Number(data.size)) ? Number(data.size) : null,
+        detail: data.detail || '',
+        error: data.error || ''
+    };
+}
+
+export function getScanItemCount(item) {
+    return Number.isFinite(Number(item?.count)) ? Number(item.count) : null;
+}
+
+export function isScanItemClear(item) {
+    const count = getScanItemCount(item);
+    return item?.status === SCAN_STATUS.OK && count === 0;
+}
+
+export function summarizeCleanupRescan(scan, types = CLEANUP_SCAN_TYPES) {
+    const items = scan?.items || {};
+    const failures = [];
+    const remaining = [];
+    let clearCount = 0;
+    for (const type of types) {
+        const item = items[type];
+        if (!item || item.status !== SCAN_STATUS.OK) {
+            failures.push(type);
+            continue;
+        }
+        const count = getScanItemCount(item);
+        if (count !== null && count > 0) {
+            remaining.push(type);
+        } else {
+            clearCount += 1;
+        }
+    }
+
+    if (failures.length === 0 && remaining.length === 0) {
+        return { result: 'success', failures, remaining };
+    }
+    if (clearCount === 0) {
+        return { result: 'failed', failures, remaining };
+    }
+    return { result: 'partial', failures, remaining };
+}
+
 // ========== Cookie ==========
 // 第一方 Cookie 操作保留原 API 名称（getCookies / clearCookies）以保持兼容，
 // 第三方 Cookie 相关 API 位于 scripts/cookies.js。
@@ -150,6 +213,80 @@ export async function getServiceWorkerStats(tabId) {
     }
 }
 
+export async function scanCleanupState(tab, includeSubdomains) {
+    const url = tab?.url || '';
+    const domain = getDomain(url);
+    const items = {};
+
+    if (!tab?.id || !domain || isUnsupportedPageUrl(url)) {
+        for (const type of CLEANUP_SCAN_TYPES) {
+            items[type] = createScanItem(SCAN_STATUS.UNSUPPORTED);
+        }
+        return { status: SCAN_STATUS.UNSUPPORTED, domain, items };
+    }
+
+    const sitePermissionGranted = await hasSitePermission(url);
+    if (sitePermissionGranted) {
+        try {
+            const { firstParty } = await getCookiesByParty(domain, includeSubdomains);
+            const cookieSize = firstParty.reduce((sum, c) => sum + c.name.length + c.value.length, 0);
+            items.cookies = createScanItem(SCAN_STATUS.OK, {
+                count: firstParty.length,
+                size: cookieSize
+            });
+        } catch (e) {
+            items.cookies = createScanItem(SCAN_STATUS.FAILED, { error: String(e?.message || e || '') });
+        }
+    } else {
+        items.cookies = createScanItem(SCAN_STATUS.NO_PERMISSION);
+    }
+
+    const storageStats = await getStorageStats(tab.id);
+    if (storageStats) {
+        items.localStorage = createScanItem(SCAN_STATUS.OK, {
+            count: storageStats.localStorage.count,
+            size: storageStats.localStorage.size
+        });
+        items.sessionStorage = createScanItem(SCAN_STATUS.OK, {
+            count: storageStats.sessionStorage.count,
+            size: storageStats.sessionStorage.size
+        });
+        items.resources = {
+            images: storageStats.resources.images,
+            scripts: storageStats.resources.scripts,
+            styles: storageStats.resources.styles,
+            others: storageStats.resources.others
+        };
+    } else {
+        items.localStorage = createScanItem(SCAN_STATUS.FAILED);
+        items.sessionStorage = createScanItem(SCAN_STATUS.FAILED);
+        items.resources = { images: null, scripts: null, styles: null, others: null };
+    }
+
+    const idbStats = await getIndexedDBStats(tab.id);
+    items.indexedDB = createScanItem(SCAN_STATUS.OK, {
+        count: idbStats.count,
+        detail: idbStats.count > 0 ? t('indexedDB.count', { count: idbStats.count }) : ''
+    });
+
+    const cacheStats = await getCacheStorageStats(tab.id);
+    items.cacheStorage = createScanItem(SCAN_STATUS.OK, {
+        count: cacheStats.count,
+        detail: cacheStats.entries > 0 ? t('cacheStorage.entries', { count: cacheStats.entries }) : ''
+    });
+
+    const swStats = await getServiceWorkerStats(tab.id);
+    items.serviceWorker = createScanItem(SCAN_STATUS.OK, { count: swStats.count });
+
+    const hasFailure = Object.values(items).some(item => item?.status === SCAN_STATUS.FAILED);
+    const hasNoPermission = Object.values(items).some(item => item?.status === SCAN_STATUS.NO_PERMISSION);
+    return {
+        status: hasFailure ? SCAN_STATUS.FAILED : hasNoPermission ? SCAN_STATUS.NO_PERMISSION : SCAN_STATUS.OK,
+        domain,
+        items
+    };
+}
+
 // ========== 清除动作 ==========
 
 export async function clearLocalStorage(tabId) {
@@ -273,6 +410,35 @@ function resetStatNodes() {
     });
 }
 
+function renderScanItem(countId, detailId, item, detailFormatter = null) {
+    const countNode = document.getElementById(countId);
+    const detailNode = detailId ? document.getElementById(detailId) : null;
+    if (!countNode) return;
+
+    if (!item || item.status === SCAN_STATUS.UNSUPPORTED) {
+        countNode.textContent = '-';
+        if (detailNode) detailNode.textContent = '';
+        return;
+    }
+    if (item.status === SCAN_STATUS.NO_PERMISSION) {
+        countNode.textContent = '-';
+        if (detailNode) detailNode.textContent = t('scan.status.noPermission');
+        return;
+    }
+    if (item.status === SCAN_STATUS.FAILED) {
+        countNode.textContent = '-';
+        if (detailNode) detailNode.textContent = t('scan.status.failed');
+        return;
+    }
+
+    countNode.textContent = String(item.count ?? 0);
+    if (detailNode) {
+        detailNode.textContent = typeof detailFormatter === 'function'
+            ? detailFormatter(item)
+            : item.detail || '';
+    }
+}
+
 export async function updateAllStats() {
     const domainNode = document.getElementById('currentDomain');
     const tab = await getCurrentTab();
@@ -299,49 +465,20 @@ export async function updateAllStats() {
         return;
     }
 
-    const sitePermissionGranted = await hasSitePermission(tab.url);
-    if (sitePermissionGranted) {
-        const { firstParty } = await getCookiesByParty(domain, includeSubdomains);
-        document.getElementById('cookieCount').textContent = firstParty.length;
-        const cookieSize = firstParty.reduce((sum, c) => sum + c.name.length + c.value.length, 0);
-        document.getElementById('cookieSize').textContent = cookieSize > 0 ? formatBytes(cookieSize) : '';
-    } else {
-        document.getElementById('cookieCount').textContent = '-';
-        document.getElementById('cookieSize').textContent = t('cookie.unauthorized');
-    }
+    const scan = await scanCleanupState(tab, includeSubdomains);
+    renderScanItem('cookieCount', 'cookieSize', scan.items.cookies, item =>
+        item.size > 0 ? formatBytes(item.size) : '');
+    renderScanItem('localStorageCount', 'localStorageSize', scan.items.localStorage, item =>
+        item.size > 0 ? formatBytes(item.size) : '');
+    renderScanItem('sessionStorageCount', 'sessionStorageSize', scan.items.sessionStorage, item =>
+        item.size > 0 ? formatBytes(item.size) : '');
+    renderScanItem('indexedDBCount', 'indexedDBSize', scan.items.indexedDB);
+    renderScanItem('cacheStorageCount', 'cacheStorageSize', scan.items.cacheStorage);
+    renderScanItem('serviceWorkerCount', null, scan.items.serviceWorker);
 
-    const storageStats = await getStorageStats(tab.id);
-    if (storageStats) {
-        document.getElementById('localStorageCount').textContent = storageStats.localStorage.count;
-        document.getElementById('localStorageSize').textContent =
-            storageStats.localStorage.size > 0 ? formatBytes(storageStats.localStorage.size) : '';
-
-        document.getElementById('sessionStorageCount').textContent = storageStats.sessionStorage.count;
-        document.getElementById('sessionStorageSize').textContent =
-            storageStats.sessionStorage.size > 0 ? formatBytes(storageStats.sessionStorage.size) : '';
-
-        document.getElementById('imageCount').textContent = storageStats.resources.images;
-        document.getElementById('scriptCount').textContent = storageStats.resources.scripts;
-        document.getElementById('styleCount').textContent = storageStats.resources.styles;
-        document.getElementById('otherCount').textContent = storageStats.resources.others;
-    }
-
-    const idbStats = await getIndexedDBStats(tab.id);
-    document.getElementById('indexedDBCount').textContent = idbStats.count;
-    if (idbStats.count > 0) {
-        document.getElementById('indexedDBSize').textContent = t('indexedDB.count', { count: idbStats.count });
-    } else {
-        document.getElementById('indexedDBSize').textContent = '';
-    }
-
-    const cacheStats = await getCacheStorageStats(tab.id);
-    document.getElementById('cacheStorageCount').textContent = cacheStats.count;
-    if (cacheStats.entries > 0) {
-        document.getElementById('cacheStorageSize').textContent = t('cacheStorage.entries', { count: cacheStats.entries });
-    } else {
-        document.getElementById('cacheStorageSize').textContent = '';
-    }
-
-    const swStats = await getServiceWorkerStats(tab.id);
-    document.getElementById('serviceWorkerCount').textContent = swStats.count;
+    const resources = scan.items.resources || {};
+    document.getElementById('imageCount').textContent = resources.images ?? '-';
+    document.getElementById('scriptCount').textContent = resources.scripts ?? '-';
+    document.getElementById('styleCount').textContent = resources.styles ?? '-';
+    document.getElementById('otherCount').textContent = resources.others ?? '-';
 }

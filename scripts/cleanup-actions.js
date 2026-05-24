@@ -11,8 +11,41 @@ import {
     clearServiceWorkers,
     clearSessionStorage,
     clearBrowsingCache,
+    scanCleanupState,
+    summarizeCleanupRescan,
     updateAllStats
 } from './cleanup.js';
+
+function getCleanupTypesForAction(type) {
+    if (type === 'all') {
+        return ['cookies', 'localStorage', 'sessionStorage', 'indexedDB', 'cacheStorage', 'serviceWorker'];
+    }
+    return [type];
+}
+
+function getCleanupResultMessage(type, result, cleanedCount = null) {
+    if (result === 'failed') return t('message.clearFailedAfterRescan');
+    if (result === 'partial') return t('message.clearPartialAfterRescan');
+
+    switch (type) {
+        case 'cookies':
+            return t('message.cookiesCleared', { count: cleanedCount ?? 0 });
+        case 'localStorage':
+            return t('message.localStorageCleared');
+        case 'sessionStorage':
+            return t('message.sessionStorageCleared');
+        case 'indexedDB':
+            return t('message.indexedDBCleared');
+        case 'cacheStorage':
+            return t('message.cacheStorageCleared');
+        case 'serviceWorker':
+            return t('message.serviceWorkerCleared');
+        case 'all':
+            return t('message.allCleared');
+        default:
+            return t('message.clearFailed');
+    }
+}
 
 export async function clearByType(type) {
     const tab = await getCurrentTab();
@@ -27,8 +60,7 @@ export async function clearByType(type) {
     const allowed = await assertWhitelistAllowed(domain, type);
     if (!allowed) return;
 
-    let success = false;
-    let message = '';
+    let executed = false;
     let cleanedCount = null;
 
     switch (type) {
@@ -40,36 +72,35 @@ export async function clearByType(type) {
             }
 
             if (!sitePermissionGranted) {
-                success = false;
-                message = t('message.permissionRequiredCookieClear');
-                break;
+                showMessage(t('message.permissionRequiredCookieClear'), 'error');
+                await recordCleanupLog({
+                    domain,
+                    action: type,
+                    result: 'failed',
+                    detail: 'cookie_permission_missing'
+                });
+                return;
             }
 
             const count = await clearCookies(domain, includeSubdomains);
-            success = true;
+            executed = true;
             cleanedCount = count;
-            message = t('message.cookiesCleared', { count });
             break;
         }
         case 'localStorage':
-            success = await clearLocalStorage(tab.id);
-            message = success ? t('message.localStorageCleared') : t('message.clearFailed');
+            executed = await clearLocalStorage(tab.id);
             break;
         case 'sessionStorage':
-            success = await clearSessionStorage(tab.id);
-            message = success ? t('message.sessionStorageCleared') : t('message.clearFailed');
+            executed = await clearSessionStorage(tab.id);
             break;
         case 'indexedDB':
-            success = await clearIndexedDB(tab.id);
-            message = success ? t('message.indexedDBCleared') : t('message.clearFailed');
+            executed = await clearIndexedDB(tab.id);
             break;
         case 'cacheStorage':
-            success = await clearCacheStorage(tab.id);
-            message = success ? t('message.cacheStorageCleared') : t('message.clearFailed');
+            executed = await clearCacheStorage(tab.id);
             break;
         case 'serviceWorker':
-            success = await clearServiceWorkers(tab.id);
-            message = success ? t('message.serviceWorkerCleared') : t('message.clearFailed');
+            executed = await clearServiceWorkers(tab.id);
             break;
         default:
             // 未知 type：出现此分支说明调用方与 UI 对不上号（比如新增了 cache-card 类型但忘了接入）。
@@ -78,25 +109,31 @@ export async function clearByType(type) {
             return;
     }
 
-    showMessage(message, success ? 'success' : 'error');
+    let summary = { result: 'failed', failures: [type], remaining: [] };
+    if (executed) {
+        const postScan = await scanCleanupState(tab, includeSubdomains);
+        summary = summarizeCleanupRescan(postScan, getCleanupTypesForAction(type));
+    }
+    const message = getCleanupResultMessage(type, summary.result, cleanedCount);
+    showMessage(message, summary.result === 'success' ? 'success' : 'error');
     await recordCleanupLog({
         domain,
         action: type,
-        result: success ? 'success' : 'failed',
+        result: summary.result,
         count: cleanedCount,
-        detail: success ? '' : message
+        detail: summary.result === 'success'
+            ? ''
+            : [...summary.failures, ...summary.remaining].join(',') || message
     });
 
-    if (success) {
-        await updateAllStats();
-        await updateSitePermissionStatus();
-        await updateWhitelistStatus();
-        if (autoRefresh) {
-            setTimeout(() => {
-                chrome.tabs.reload(tab.id);
-                window.close();
-            }, 500);
-        }
+    await updateAllStats();
+    await updateSitePermissionStatus();
+    await updateWhitelistStatus();
+    if (summary.result !== 'failed' && autoRefresh) {
+        setTimeout(() => {
+            chrome.tabs.reload(tab.id);
+            window.close();
+        }, 500);
     }
 }
 
@@ -123,8 +160,8 @@ export async function clearAll() {
         ? clearCookies(domain, includeSubdomains)
         : Promise.resolve(0);
 
-    await Promise.all([
-        cookieTask,
+    const executionResults = await Promise.all([
+        cookieTask.then(() => cookiePermissionGranted),
         clearLocalStorage(tab.id),
         clearSessionStorage(tab.id),
         clearIndexedDB(tab.id),
@@ -133,23 +170,34 @@ export async function clearAll() {
         clearBrowsingCache(origin)
     ]);
 
-    if (cookiePermissionGranted) {
-        showMessage(t('message.allCleared'), 'success');
-    } else {
-        showMessage(t('message.allClearedWithoutCookie'), 'error');
-    }
+    const postScan = await scanCleanupState(tab, includeSubdomains);
+    const summary = summarizeCleanupRescan(postScan, getCleanupTypesForAction('all'));
+    const hasExecutionFailure = executionResults.some(result => !result);
+    const result = hasExecutionFailure && summary.result === 'success' ? 'partial' : summary.result;
+    showMessage(
+        result === 'success'
+            ? t('message.allCleared')
+            : cookiePermissionGranted
+                ? t('message.clearPartialAfterRescan')
+                : t('message.allClearedWithoutCookie'),
+        result === 'success' ? 'success' : 'error'
+    );
     await recordCleanupLog({
         domain,
         action: 'all',
-        result: cookiePermissionGranted ? 'success' : 'partial',
-        detail: cookiePermissionGranted ? '' : 'cookie_permission_missing'
+        result,
+        detail: result === 'success'
+            ? ''
+            : [...summary.failures, ...summary.remaining, cookiePermissionGranted ? '' : 'cookie_permission_missing']
+                .filter(Boolean)
+                .join(',')
     });
 
     await updateAllStats();
     await updateSitePermissionStatus();
     await updateWhitelistStatus();
 
-    if (autoRefresh) {
+    if (result !== 'failed' && autoRefresh) {
         setTimeout(() => {
             chrome.tabs.reload(tab.id);
             window.close();

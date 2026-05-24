@@ -1,198 +1,119 @@
-# 缓存清理专家 Pro
+# 缓存清除器 Pro
 
 <p align="center">
-  <img src="./icons/icon128.png" alt="Cache Cleaner Pro Icon" width="96" />
-</p>
-
-<p 对齐="居中">
-  面向当前站点的缓存与存储清理扩展，支持浏览记录清理、站点授权管理、站点保护列表、清理历史日志、深浅主题与 Tab 分栏操作。
+  <img src="./icons/icon128.png" alt="缓存清除器 Pro 图标" width="96" />
 </p>
 
 <p align="center">
-  <img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-0A84FF">
-  <img alt="Edge" src="https://img.shields.io/badge/Edge-Supported-0078D7">
-  <img alt="Chrome" src="https://img.shields.io/badge/Chrome-Supported-4285F4">
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0-2ea44f">
+  面向 Chromium 浏览器的 Manifest V3 站点清理扩展，支持当前站点数据清理、浏览记录清理、权限管理、保护列表、资料清理和无痕退出。
 </p>
 
-## 目录
+## 功能亮点
 
-- [项目亮点](#项目亮点)
-- [功能清单](#功能清单)
-- [近期更新](#近期更新)
-- [界面与交互](#界面与交互)
-- [界面截图](#界面截图)
-- [架构说明](#架构说明)
-- [快速开始](#快速开始)
-- [权限说明](#权限说明)
-- [兼容性与限制](#兼容性与限制)
-- [项目结构](#项目结构)
-- [开发建议](#开发建议)
-- [常见问题](#常见问题)
-- [版本](#版本)
+- 当前站点清理：Cookie、LocalStorage、SessionStorage、IndexedDB、Cache Storage、Service Worker 和浏览器缓存。
+- 浏览记录清理：按当前域名和时间范围扫描、清理，并在清理后复扫确认结果。
+- 权限与保护：按站点请求/撤销 Cookie 访问授权，支持站点保护列表防止误清理。
+- 资料清理：清除浏览器自动填充数据和保存密码，并明确提示此类 API 不返回扫描数量。
+- 无痕退出：清理当前站点数据、浏览记录与授权后，关闭被清理的网页标签页。
+- 离线可用：Font Awesome CSS 与字体已 vendored 到 `vendor/fontawesome/`，popup 不依赖 CDN。
+- 双语与主题：支持中文/English 切换，支持深浅主题并持久化保存。
 
-## 项目亮点
-
-- 专注“当前站点”清理，不是全浏览器粗暴清理。
-- Cookie 权限按站点动态授权，可撤销，安全边界更清晰。
-- 三个横向 Tab 分区：`清理`、`记录`、`权限`，减少长页面操作负担。
-- 支持键盘左右切换 Tab（`ArrowLeft` / `ArrowRight`）。
-- 主题可切换并持久化保存（深色 / 浅色）。
-- 支持中文 / English 一键切换，并持久化语言选择。
-- 支持站点保护列表，避免误清理关键站点。
-- 支持清理历史日志查看（时间、站点、清理项、结果），并支持按结果筛选和清空日志。
-
-## 功能清单
-
-| 模块 | 能力 |
-| --- | --- |
-| 站点数据清理 | Cookie、LocalStorage、SessionStorage、IndexedDB、Cache Storage、Service Worker、浏览器缓存 |
-| 浏览记录清理 | 按当前域名统计与清理，可选包含子域名，可选时间范围 |
-| 授权管理 | 查看当前站点授权状态、授权当前站点、撤销当前站点授权 |
-| 保护与审计 | 站点保护列表（白名单）管理，清理历史日志记录、结果筛选（全部/成功/失败/拦截）与清空 |
-| 体验能力 | 标签页切换、主题切换、语言切换、Toast 消息提示、一键刷新统计 |
-
-## 近期更新
-
-- 添加了中英文切换功能（`中文 / English`），并实现了语言设置的持久化。
-- 弹窗窗口尺寸固定为 `400 x 540`，解决了英文文本切换时窗口扩张和抖动的问题。
-- 优化 Tab 内容区底部留白过渡，避免按钮与边界贴边。
-- 优化外层容器圆角（仅外层容器），保持内部卡片/按钮风格一致。
-- 新增站点保护列表（白名单）：支持加入保护、取消保护、列表展示与命中拦截清理。
-- 新增清理历史日志：记录时间、站点、清理项、结果、数量/详情。
-- 新增日志筛选：`全部 / 成功 / 失败 / 拦截`。
-- 新增一键清空日志；清空失败时增加本地存储兜底清空逻辑。
-- 修复权限/白名单模块在浅色主题下按钮可读性问题。
-- 修复深浅主题下局部“蒙版感”/上下色块不一致问题。
-- 滚动条样式统一为灰色系，深浅主题保持一致。
-
-## 界面与交互
+## 界面模块
 
 | Tab | 说明 |
 | --- | --- |
-| 清理 | 查看各类存储统计，支持单项清理与一键清理 |
-| 记录 | 按时间范围查看并清理当前域名浏览记录，并查看/筛选/清空最近清理历史日志 |
-| 权限 | 查看当前站点权限状态，进行授权/撤销，管理保护站点，配置子域名与自动刷新 |
+| 清理 | 展示当前站点各类存储状态，支持单项清理和一键清理 |
+| 记录 | 扫描/清理当前域名浏览记录，查看清理日志并按结果筛选 |
+| 权限 | 管理当前站点授权、站点保护列表、子域名范围和自动刷新 |
+| 资料 | 全浏览器资料清理、无痕退出和高风险操作确认 |
 
-键盘交互：
+## 近期更新
 
-- `ArrowLeft`：切换到左侧 Tab
-- `ArrowRight`：切换到右侧 Tab
-
-说明：
-
-- 焦点在 `input`、`select`、`textarea` 或可编辑区域时，不拦截方向键。
-
-## 界面截图
-
-以下截图均使用 `images/` 目录中的本地图片文件。  
-若图片未显示，请确认以下文件存在：`images/1.5.png`、`images/3.5.png`。
-
-| 清理 Tab（浅色，上半） | 清理 Tab（浅色，下半） |
-| --- | --- |
-| ![清理 Tab（浅色，上半）](./images/01.png) | ![清理 Tab（浅色，下半）](./images/1.5.png) |
-| 记录 Tab（浅色） | 权限与保护列表（浅色） |
-| ![记录 Tab（浅色）](./images/02.png) | ![权限与保护列表（浅色）](./images/3.5.png) |
-
-
-## 架构说明
-
-```mermaid
-flowchart LR
-    A[Popup UI\npopup.html + popup.js] --> B[Chrome Extension APIs]
-    B --> C[cookies / scripting / browsingData]
-    B --> D[permissions / storage / tabs]
-    A --> E[Message Channel]
-    E --> F[background.js]
-    F --> G[history.search / history.deleteUrl]
-```
-
-说明：
-
-- `popup.js` 负责 UI 状态、统计、清理动作和权限交互。
-- `background.js` 负责历史记录相关的后台查询与清除。
+- 清理页改为紧凑列表 UI，减少卡片式展示感。
+- 浏览记录清理加入结构化结果、截断提示、失败计数和清理后复扫。
+- 资料页清理加入不可验证声明、结构化日志和更明确的高风险确认。
+- “访客模式”更名为“无痕退出”，完成后关闭被清理网页标签页。
+- 后台消息入口增加发送方校验和消息类型白名单。
+- partial 加载增加本地片段白名单和结构校验。
+- Font Awesome 资源本地化，移除 popup 对远程 CDN 的依赖。
 
 ## 快速开始
-
-### 1) 安装（Edge / Chrome）
 
 1. 打开扩展管理页：
    - Edge: `edge://extensions/`
    - Chrome: `chrome://extensions/`
 2. 开启“开发者模式”。
 3. 点击“加载已解压的扩展程序”，选择本项目根目录。
-4. 修改代码后回到扩展页点击“刷新”。
+4. 修改代码后，在扩展管理页点击“刷新”。
 
-### 2) 运行与测试
+## 开发与测试
 
-1. 打开任意 `http/https` 网站。
-2. 点击扩展图标打开弹窗。
-3. 在 `清理` Tab 执行扫描或清理。
-4. 在 `记录` Tab 验证历史统计与清除。
-5. 在 `权限` Tab 测试授权/撤销是否生效。
+本项目无构建步骤，直接作为未打包扩展加载。自动化测试使用 Node.js 内置测试框架。
+
+```powershell
+npm test
+node --check background.js
+node --check scripts/main.js
+```
 
 ## 权限说明
 
 | 权限 | 用途 |
 | --- | --- |
-| `cookies` | 读取与删除 Cookie |
+| `cookies` | 读取、分类和删除 Cookie |
 | `activeTab` | 获取当前活动标签页上下文 |
-| `browsingData` | 清除浏览器缓存 |
-| `storage` | 持久化主题、语言和当前 Tab 状态 |
-| `scripting` | 注入脚本读取/清理站点存储 |
-| `history` | 查询与删除浏览记录 |
-| `optional_host_permissions` | 按站点请求/撤销授权（当前为 `<all_urls>` 可选） |
-
-Cookie 清理策略：
-
-- 若当前站点未授权，会在清理 Cookie 时触发授权请求。
-- 拒绝授权时，Cookie 不会被清理，其它可清理项不受影响。
+| `browsingData` | 清除浏览器缓存、表单数据和保存密码 |
+| `storage` | 保存主题、语言、Tab 状态、白名单和清理日志 |
+| `scripting` | 注入脚本扫描/清理当前站点存储 |
+| `history` | 扫描与删除浏览记录 |
+| `contentSettings` | 管理当前站点内容设置 |
+| `optional_host_permissions` | 按站点请求或撤销主机访问权限 |
 
 ## 兼容性与限制
 
-- 兼容 Chromium 内核浏览器：Edge、Chrome（Manifest V3）。
-- 对 `edge://`、`chrome://`、扩展页等受限页面无法执行注入与清理。
-- 历史搜索有上限：`HISTORY_MAX_RESULTS = 5000`。
-- 存储大小统计是估算值，主要用于趋势与对比。
+- 支持 Chrome、Edge 等 Chromium 内核浏览器，要求 Manifest V3。
+- `chrome://`、`edge://`、扩展页等受限页面无法注入脚本或执行站点清理。
+- 浏览记录扫描受 `HISTORY_MAX_RESULTS = 5000` 限制；达到上限时 UI 会提示统计可能不完整。
+- 自动填充数据和保存密码只能按时间范围全浏览器清理，浏览器 API 不提供数量扫描或复扫验证。
+- 存储大小为估算值，适合判断趋势，不等同于浏览器精确占用。
 
 ## 项目结构
 
 ```text
-cookie-cleaner-extension/
-├─ manifest.json
-├─ popup.html
-├─ popup.js
-├─ background.js
-├─ icon.png
-├─ images/
-│  ├─ 01.png
-│  ├─ 1.5.png
-│  ├─ 02.png
-│  ├─ 03.png
-│  └─ 3.5.png
-└─ icons/
-   ├─ icon16.png
-   ├─ icon32.png
-   └─ icon128.png
+.
+├─ manifest.json              # MV3 权限、popup、background 配置
+├─ popup.html                 # popup 外壳，动态加载 partials
+├─ background.js              # 后台历史、白名单、日志消息处理
+├─ partials/                  # 清理、记录、权限、资料等 UI 片段
+├─ scripts/                   # ES modules 业务逻辑与纯函数模型
+├─ styles/                    # 分模块 CSS
+├─ test/                      # node --test 单元测试
+├─ icons/                     # 扩展图标
+├─ images/                    # README 截图
+└─ vendor/fontawesome/        # 本地 Font Awesome CSS 与 webfonts
 ```
 
-## 开发建议
+## 截图
 
-- 提交前检查 `popup.js` 语法：`node --check popup.js`
-- 改动 `manifest.json` 后务必在浏览器扩展页点击刷新
-- 建议保留图标尺寸 `16 / 32 / 128` 与 manifest 一致
+| 清理 Tab（浅色，上半） | 清理 Tab（浅色，下半） |
+| --- | --- |
+| ![清理 Tab（浅色，上半）](./images/01.png) | ![清理 Tab（浅色，下半）](./images/1.5.png) |
+
+| 记录 Tab（浅色） | 权限与保护列表（浅色） |
+| --- | --- |
+| ![记录 Tab（浅色）](./images/02.png) | ![权限与保护列表（浅色）](./images/3.5.png) |
 
 ## 常见问题
 
-**Q: 为什么有时 Cookie 数量显示为 `-` 或无法清理？**  
-A: 当前站点可能尚未授权。请到 `权限` Tab 点击“授权”。
+**为什么 Cookie 数量显示为 `-`？**  
+当前站点可能尚未授权。到“权限”Tab 授权后再扫描或清理。
 
-**Q: 为什么在 `edge://extensions/` 页面不能清理？**  
-A: 浏览器限制，受保护页面不支持脚本注入和常规站点清理。
+**为什么资料页不显示自动填充或密码数量？**  
+浏览器扩展 API 不允许读取这些数据的数量或内容。扩展只能打开浏览器设置页供人工查看，并提交清除请求。
 
-**Q: 浏览记录为什么显示为 0？**  
-A: 可能是时间范围、域名匹配或子域名开关导致。请切换时间范围并确认“包含所有子域名数据”设置。
+**为什么历史记录显示 `5000+` 或提示可能不完整？**  
+浏览器历史搜索有最大结果限制。达到上限时，扩展会继续清理已匹配项，但不会承诺统计完整。
 
 ## 版本
 
-- 当前版本：`2.0`
+当前版本：`2.0`

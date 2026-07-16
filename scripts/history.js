@@ -50,7 +50,9 @@ async function getHistoryItemsFromPopup(domain, timeRangeMs, includeSubdomains) 
         };
     }
 
-    const queryTexts = Array.from(new Set([candidates[0], ...candidates, ''])).filter(text => text !== undefined);
+    // 仅用域名文本查询，避免空字符串查询拉取全部历史记录。
+    // filterHistoryItems 会在客户端做精确域名匹配，补全 text 搜索的遗漏。
+    const queryTexts = Array.from(new Set(candidates)).filter(Boolean);
     const queryResults = await Promise.all(
         queryTexts.map(async text => {
             try {

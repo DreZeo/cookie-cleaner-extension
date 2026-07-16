@@ -8,9 +8,7 @@ export function normalizeDomain(domain) {
 export function getDomainCandidates(domain) {
     const normalized = normalizeDomain(domain);
     if (!normalized) return [];
-    const candidates = new Set();
-    candidates.add(normalized);
-    return Array.from(candidates).filter(Boolean);
+    return [normalized];
 }
 
 export function matchesDomain(itemDomain, baseDomain, includeSubdomains) {

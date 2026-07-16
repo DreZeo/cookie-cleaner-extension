@@ -28,11 +28,19 @@ This is a Manifest V3 browser extension for cache and privacy cleanup. `manifest
 
 ## Build, Test, and Development Commands
 
-There is no package manager setup or build step in this repository. Load the project directly as an unpacked extension:
+There is no bundler or build step; load the project directly as an unpacked extension:
 
 ```powershell
 # Edge/Chrome: Extensions page -> Developer mode -> Load unpacked
 # Select: C:\Users\admin\Desktop\coding\pro
+```
+
+Run the automated tests with Node's built-in runner (no extra dependencies):
+
+```powershell
+npm test                  # runs `node --test` against test/
+node --check background.js
+node --check scripts/main.js
 ```
 
 After edits, reload the extension from the browser extensions page and test the popup manually. Use `rg "term" scripts background.js` to search code quickly.
@@ -43,11 +51,11 @@ Use modern plain JavaScript ES modules with two-space indentation, `const`/`let`
 
 ## Testing Guidelines
 
-No automated test framework is currently configured. Validate changes manually in Chromium-based browsers, especially popup loading, permission prompts, cleanup actions, history filtering, whitelist behavior, and `chrome.storage.local` persistence. For risky logic changes, add focused manual test notes to the pull request and consider extracting pure helpers that can later be covered by unit tests.
+Automated unit tests run on Node's built-in test runner via `npm test` and live in `test/`, covering pure helpers and models (`domain-utils`, `cookies`, `history-model`, `privacy-model`, and the cleanup scan). Prefer extracting pure functions so new logic can be unit-tested there. Browser-dependent behavior still needs manual validation in Chromium-based browsers, especially popup loading, permission prompts, cleanup actions, history filtering, whitelist behavior, and `chrome.storage.local` persistence. For risky logic changes, add focused manual test notes to the pull request.
 
 ## Commit & Pull Request Guidelines
 
-This repository has no commit history yet, so use clear conventional-style subjects such as `fix: normalize whitelist domains` or `feat: add cleanup summary`. Pull requests should describe the user-facing change, list manual browser checks performed, mention permission or manifest changes, and include screenshots for popup UI changes.
+Follow the conventional-commit style already used in the git history, such as `fix: normalize whitelist domains` or `feat: add cleanup summary`. Pull requests should describe the user-facing change, list manual browser checks performed, mention permission or manifest changes, and include screenshots for popup UI changes.
 
 ## Security & Configuration Tips
 

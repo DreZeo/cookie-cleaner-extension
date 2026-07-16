@@ -13,31 +13,21 @@ import {
     mergeHistorySearchResults,
     summarizeHistoryClear
 } from './history-model.js';
+import { historySearch, historyDeleteUrl } from './history-api.js';
 
-function historySearch(query) {
-    return new Promise(resolve => {
-        try {
-            chrome.history.search(query, results => {
-                const err = chrome.runtime?.lastError;
-                if (err) {
-                    console.error('history.search failed:', err);
-                    resolve([]);
-                    return;
-                }
-                resolve(results || []);
-            });
-        } catch (e) {
-            console.error('history.search exception:', e);
-            resolve([]);
-        }
+// popup 侧 lenient 包装：historySearch 出错时 resolve 空数组而非 reject，
+// 保证扫描失败不阻断 UI 渲染。
+function historySearchLenient(query) {
+    return historySearch(query).catch(e => {
+        console.error('history.search failed:', e);
+        return [];
     });
 }
+
 
 function isHistoryApiAvailable() {
     return !!chrome.history && typeof chrome.history.search === 'function';
 }
-
-async function getHistoryItemsFromPopup(domain, timeRangeMs, includeSubdomains) {
     const safeTimeRangeMs = toSafeTimeRangeMs(timeRangeMs);
     const startTime = safeTimeRangeMs > 0 ? Date.now() - safeTimeRangeMs : 0;
     const candidates = getDomainCandidates(domain);
@@ -54,18 +44,11 @@ async function getHistoryItemsFromPopup(domain, timeRangeMs, includeSubdomains) 
     // filterHistoryItems 会在客户端做精确域名匹配，补全 text 搜索的遗漏。
     const queryTexts = Array.from(new Set(candidates)).filter(Boolean);
     const queryResults = await Promise.all(
-        queryTexts.map(async text => {
-            try {
-                return await historySearch({
-                    text,
-                    startTime,
-                    maxResults: HISTORY_MAX_RESULTS
-                });
-            } catch (err) {
-                console.error('history.search failed:', err);
-                return [];
-            }
-        })
+        queryTexts.map(text => historySearchLenient({
+            text,
+            startTime,
+            maxResults: HISTORY_MAX_RESULTS
+        }))
     );
 
     return mergeHistorySearchResults(queryResults, candidates, includeSubdomains, HISTORY_MAX_RESULTS);
@@ -99,19 +82,6 @@ async function getHistoryStats(domain, timeRangeMs, includeSubdomains) {
         console.error('搜索历史记录失败:', e);
         return { status: 'failed', count: 0, truncated: false };
     }
-}
-
-function historyDeleteUrl(url) {
-    return new Promise(resolve => {
-        try {
-            chrome.history.deleteUrl({ url }, () => {
-                const err = chrome.runtime?.lastError;
-                resolve(!err);
-            });
-        } catch {
-            resolve(false);
-        }
-    });
 }
 
 export async function clearHistory(domain, timeRangeMs, includeSubdomains) {

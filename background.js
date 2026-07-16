@@ -13,6 +13,10 @@ import {
   mergeHistorySearchResults,
   summarizeHistoryClear
 } from './scripts/history-model.js';
+import {
+  historySearch,
+  historyDeleteUrl
+} from './scripts/history-api.js';
 
 const HISTORY_MAX_RESULTS = 5000;
 const WHITELIST_STORAGE_KEY = 'whitelistRules';
@@ -227,23 +231,6 @@ async function clearCleanupLogs() {
   return { cleared: true };
 }
 
-function historySearch(query) {
-  return new Promise((resolve, reject) => {
-    try {
-      chrome.history.search(query, results => {
-        const err = chrome.runtime?.lastError;
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(results || []);
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
-
 async function getHistoryItems(domain, timeRangeMs, includeSubdomains) {
   const candidates = getDomainCandidates(domain);
   if (candidates.length === 0) {
@@ -277,19 +264,6 @@ async function getHistoryItems(domain, timeRangeMs, includeSubdomains) {
   );
 
   return mergeHistorySearchResults(queryResults, candidates, includeSubdomains, HISTORY_MAX_RESULTS);
-}
-
-function historyDeleteUrl(url) {
-  return new Promise(resolve => {
-    try {
-      chrome.history.deleteUrl({ url }, () => {
-        const err = chrome.runtime?.lastError;
-        resolve(!err);
-      });
-    } catch {
-      resolve(false);
-    }
-  });
 }
 
 async function clearHistory(domain, timeRangeMs, includeSubdomains) {

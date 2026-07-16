@@ -105,11 +105,8 @@ export async function runGuestMode(tab, options = {}) {
         return buildGuestModeResult({ status: 'failed', failures: ['unsupportedPage'] });
     }
 
-    if (!options.overrideWhitelist) {
-        // 无痕退出是浏览器级深度清理，保留白名单默认保护。
-        // 只有用户主动勾选忽略白名单时才允许继续。
-    }
-
+    // 无痕退出是浏览器级深度清理，默认受白名单保护；
+    // 仅当用户主动勾选"忽略白名单"时才跳过检查。
     if (!overrideWhitelist) {
         try {
             const whitelist = await checkWhitelistDomain(domain);

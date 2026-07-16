@@ -86,9 +86,12 @@ export async function getContentSettings(url) {
  * 注意：Chrome contentSettings.set 不接受 'default'；要移除用户规则
  * 需用 clear({ scope }) 清除整类，或用此函数覆盖为新值。
  */
+const ALLOWED_CONTENT_SETTINGS = new Set(['allow', 'block', 'ask']);
+
 export async function setContentSettingForSite(settingType, url, value) {
     const pattern = getOriginPattern(url);
     if (!pattern) throw new Error('invalid url');
     if (!chrome.contentSettings?.[settingType]) throw new Error('content settings api unavailable');
+    if (!ALLOWED_CONTENT_SETTINGS.has(String(value))) throw new Error(`invalid setting value: ${value}`);
     await contentSettingSet(settingType, pattern, value);
 }

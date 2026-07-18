@@ -28,6 +28,8 @@ function historySearchLenient(query) {
 function isHistoryApiAvailable() {
     return !!chrome.history && typeof chrome.history.search === 'function';
 }
+
+async function getHistoryItemsFromPopup(domain, timeRangeMs, includeSubdomains) {
     const safeTimeRangeMs = toSafeTimeRangeMs(timeRangeMs);
     const startTime = safeTimeRangeMs > 0 ? Date.now() - safeTimeRangeMs : 0;
     const candidates = getDomainCandidates(domain);
